@@ -63,40 +63,24 @@ export function MyBooks() {
   };
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1>My Books</h1>
+    <>
       <BookForm />
+      <h1>MyBooks</h1>
       {loading ? (
         <p>Loading...</p>
-      ) : books.length === 0 ? (
-        <p>No books yet</p>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-            gap: 12,
-          }}
-        >
-          {books.map((b) => (
-            <div
-              key={b.id}
-              style={{ border: "1px solid #ddd", padding: 12, borderRadius: 6 }}
-            >
-              <img
-                src={b.photoUrl || "/placeholder.png"}
-                alt={b.name}
-                style={{ width: "100%", height: 140, objectFit: "cover" }}
-              />
-              <h3>{b.name}</h3>
-              <p>{b.author}</p>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => handleDelete(b)}>Delete</button>
-              </div>
-            </div>
+        <ul>
+          {books.map((book) => (
+            <li key={book.id}>
+              <img src={book.photoUrl} alt={book.name} />
+              <h2>{book.name}</h2>
+              <p>Author: {book.author}</p>
+              <p>Added: {book.createdAt.toDate().toLocaleDateString()}</p>
+              <button onClick={() => handleDelete(book)}>Delete</button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
-    </div>
+    </>
   );
 }

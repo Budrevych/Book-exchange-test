@@ -23,12 +23,12 @@ export function BookForm() {
 
     try {
       // Якщо є файл — завантажуємо його у Firebase Storage
-      if (file) {
-        storagePath = `books/${user.uid}/${Date.now()}_${file.name}`;
-        const sRef = ref(storage, storagePath);
-        await uploadBytes(sRef, file); // завантажуємо файл
-        photoUrl = await getDownloadURL(sRef); // отримуємо URL
-      }
+      // if (file) {
+      //   storagePath = `books/${user.uid}/${Date.now()}_${file.name}`;
+      //   const sRef = ref(storage, storagePath);
+      //   await uploadBytes(sRef, file); // завантажуємо файл
+      //   photoUrl = await getDownloadURL(sRef); // отримуємо URL
+      // }
 
       // Зберігаємо книгу в Firestore
       await addDoc(collection(db, "books"), {
