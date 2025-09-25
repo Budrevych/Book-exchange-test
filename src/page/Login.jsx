@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { login } from "../api/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -25,6 +25,12 @@ export function Login() {
           Log in to your account
         </h1>
         <div className="border border-gray-400 p-4 rounded-md">
+          <h3 className="text-xl">
+            Don’t have an account?{" "}
+            <Link to="/register" className="text-sky-400">
+              Register here
+            </Link>
+          </h3>
           <form
             onSubmit={onSubmit}
             className="flex flex-col gap-2 mx-3 my-6 w-100"
