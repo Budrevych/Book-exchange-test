@@ -1,86 +1,85 @@
+// src/pages/MyBooks.jsx
 import React, { useEffect, useState } from "react";
-import { db, storage } from "../firebase/fairbaseConfig";
 import {
   collection,
   query,
   where,
-  orderBy,
   onSnapshot,
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { ref as storageRef, deleteObject } from "firebase/storage";
+import { db } from "../firebase/fairbaseConfig";
 import { useAuthStore } from "../stores/useAuthStore";
 import { BookForm } from "../components/BookForm/BookForm";
 
 export function MyBooks() {
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore((s) => s.user);
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      setBooks([]);
-      setLoading(false);
-      return;
-    }
-    const q = query(
-      collection(db, "books"),
-      where("ownerId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    );
+    if (!user) return;
 
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setBooks(items);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Snapshot error:", err);
-        setLoading(false);
-      }
-    );
+    const q = query(collection(db, "books"), where("ownerId", "==", user.uid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setBooks(data);
+    });
 
-    return () => unsub();
+    return () => unsubscribe();
   }, [user]);
 
-  const handleDelete = async (book) => {
-    if (!confirm("Are you sure you want to delete this book?")) return;
+  const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "books", book.id));
-
-      if (book.storagePath) {
-        const sRef = storageRef(storage, book.storagePath);
-        await deleteObject(sRef);
-      }
-      alert("Deleted");
+      await deleteDoc(doc(db, "books", id));
     } catch (err) {
-      console.error(err);
-      alert(err.message || "Delete failed");
+      console.error("Error deleting book:", err);
     }
   };
 
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-600">Please log in to see your books.</p>
+      </div>
+    );
+  }
+
   return (
-    <>
+    <div className="max-w-3xl mx-auto p-6">
       <BookForm />
-      <h1>MyBooks</h1>
-      {loading ? (
-        <p>Loading...</p>
+
+      <h2 className="text-2xl font-bold mt-8 mb-4">My Books</h2>
+
+      {books.length === 0 ? (
+        <p className="text-gray-500">You haven’t added any books yet.</p>
       ) : (
-        <ul>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {books.map((book) => (
-            <li key={book.id}>
-              <img src={book.photoUrl} alt={book.name} />
-              <h2>{book.name}</h2>
-              <p>Author: {book.author}</p>
-              <p>Added: {book.createdAt.toDate().toLocaleDateString()}</p>
-              <button onClick={() => handleDelete(book)}>Delete</button>
-            </li>
+            <div
+              key={book.id}
+              className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col"
+            >
+              <img
+                src={book.photoUrl || "/placeholder.png"}
+                alt={book.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">{book.name}</h3>
+                  <p className="text-gray-600">{book.author}</p>
+                </div>
+                <button
+                  onClick={() => handleDelete(book.id)}
+                  className="mt-4 px-3 py-2 text-sm rounded-md bg-red-500 text-white font-medium hover:bg-red-600 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
-    </>
+    </div>
   );
 }

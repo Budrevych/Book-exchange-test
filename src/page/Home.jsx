@@ -1,11 +1,10 @@
+import React from "react";
 import { Login } from "./Login";
-import { Register } from "./Register";
-import { Link } from "react-router-dom";
+import { UserInfo } from "../components/UserInfo/UserInfo";
+import { useAuthStore } from "../stores/useAuthStore";
 
 export function Home() {
-  return (
-    <>
-      <Login />
-    </>
-  );
+  const user = useAuthStore((state) => state.user);
+
+  return <>{user ? <UserInfo /> : <Login />}</>;
 }
